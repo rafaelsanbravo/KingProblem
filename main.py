@@ -12,15 +12,14 @@ Explore all the adjacent cells for the current position,
 if not visited before calculate f for that position,
 next iteration get the position with the lowest f,
 if the reward is better update the optimal position,
-finish the loop when the list is empty.
+finish the loop when the list is empty or the counter reaches the specified steps.
 
 """
 def get_possible_moves(x, y):
     moves = []
     for x_move in [-1, 0, 1]:
         for y_move in [-1, 0, 1]:
-            if (x_move, y_move) != (0, 0):
-                moves.append((x + x_move, y + y_move))
+            moves.append((x + x_move, y + y_move))
                 
     possible_moves = []
     for new_x, new_y in moves:
@@ -30,12 +29,13 @@ def get_possible_moves(x, y):
     return possible_moves
 
     
-def find_highest_reward_coordinates(chess_board:list[list[float]], starting_point:tuple):
+def find_highest_reward_coordinates(chess_board:list[list[float]], starting_point:tuple, steps=30):
     visited = []
     optimal_position = starting_point
     main_list = [(0, starting_point, 0)]
+    counter = 0
 
-    while main_list:
+    while main_list and counter < steps:
         main_list.sort(key=lambda x: x[0])
         f, (x, y), g = main_list.pop(0)
 
@@ -43,11 +43,16 @@ def find_highest_reward_coordinates(chess_board:list[list[float]], starting_poin
             continue
         
         visited.append((x, y))
+        
 
         if chess_board[x][y] > chess_board[optimal_position[0]][optimal_position[1]]:
             optimal_position = (x, y)
+            counter = 0
+            
+        else:
+            counter += 1
 
-        for adjacent_x, adjacent_y in get_possible_moves(x, y):
+        for adjacent_x, adjacent_y in get_possible_moves(x, y) + [(x, y)]:
             if (adjacent_x, adjacent_y) not in visited:
                 new_g = g + chess_board[adjacent_x][adjacent_y]
                 new_f = new_g - chess_board[adjacent_x][adjacent_y]
