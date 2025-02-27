@@ -1,5 +1,20 @@
-import random
+"""
+In this script I attempt to solve the Data Science / AI Challenge
+ 
+I decided to use A* Search to find the highest reward
+f = g + h
+f: total cost
+g: actual cost
+h(heuristic): estimated cost
 
+The main function uses the following logic:
+Explore all the adjacent cells for the current position, 
+if not visited before calculate f for that position,
+next iteration get the position with the lowest f,
+if the reward is better update the optimal position,
+finish the loop when the list is empty.
+
+"""
 def get_possible_moves(x, y):
     moves = []
     for x_move in [-1, 0, 1]:
@@ -15,11 +30,27 @@ def get_possible_moves(x, y):
     return possible_moves
 
     
-board = [[0,0,0,0],[0,0,0,0],[0,0,-0.04,0],[0,0,1,-0.1]]
-start = (random.randint(0, 3), random.randint(0, 3))
+def find_highest_reward_coordinates(chess_board:list[list[float]], starting_point:tuple):
+    visited = []
+    optimal_position = starting_point
+    main_list = [(0, starting_point, 0)]
 
+    while main_list:
+        main_list.sort(key=lambda x: x[0])
+        f, (x, y), g = main_list.pop(0)
 
-print(f"board {board}")
-print(f"start {start}")
+        if (x, y) in visited:
+            continue
+        
+        visited.append((x, y))
 
-print(get_possible_moves(start[0], start[1]))
+        if chess_board[x][y] > chess_board[optimal_position[0]][optimal_position[1]]:
+            optimal_position = (x, y)
+
+        for adjacent_x, adjacent_y in get_possible_moves(x, y):
+            if (adjacent_x, adjacent_y) not in visited:
+                new_g = g + chess_board[adjacent_x][adjacent_y]
+                new_f = new_g - chess_board[adjacent_x][adjacent_y]
+                main_list.append((new_f, (adjacent_x, adjacent_y), new_g))
+
+    return optimal_position
